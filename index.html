@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard - Estatística Geral DMC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonte opcional do Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js para gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg-body: #0b1020;
+      --bg-card: #13192b;
+      --bg-card-soft: #151b30;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.12);
+      --accent-strong: #16a34a;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --danger: #ef4444;
+      --warning: #f97316;
+      --info: #3b82f6;
+      --radius-xl: 1.5rem;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      border-right: 1px solid var(--border-subtle);
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #022c22;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.8);
+    }
+
+    .sidebar-title {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .sidebar-title span:first-child {
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      color: var(--text-main);
+    }
+
+    .sidebar-title span:last-child {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .nav-section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .nav-item {
+      border-radius: 999px;
+      padding: 0.45rem 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.87rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.18s.ease;
+    }
+
+    .nav-item::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background-color: transparent;
+      box-shadow: 0 0 0 transparent;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(15, 23, 42, 0.9);
+      border-color: var(--border-subtle);
+      color: var(--text-main);
+      transform: translateX(2px);
+    }
+
+    .nav-item.active {
+      background-color: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .nav-item.active::before {
+      background-color: var(--accent);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(15, 23, 42, 0.9);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* MAIN LAYOUT */
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1.75rem;
+      gap: 1.5rem;
+    }
+
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .main-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .main-header-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-pill {
+      font-size: 0.75rem;
+      padding: 0.18rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+    }
+
+    .main-header-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .main-header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background-color: rgba(15, 23, 42, 0.9);
+      padding: 0.45rem 0.95rem;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn span.icon {
+      font-size: 0.9rem;
+    }
+
+    .btn:hover {
+      background-color: #020617;
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      border-color: transparent;
+      color: #022c22;
+      font-weight: 600;
+      box-shadow: 0 10px 24px rgba(22, 163, 74, 0.35);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    /* FILTER BAR */
+
+    .filters-card {
+      background: radial-gradient(circle at top left, #111827 0, #020617 65%);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .filters-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .breadcrumbs {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .breadcrumbs span {
+      opacity: 0.6;
+    }
+
+    .breadcrumbs span.active {
+      color: var(--accent);
+      opacity: 1;
+    }
+
+    .filters-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .field label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    select,
+    input[type="text"] {
+      background-color: var(--bg-card-soft);
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      padding: 0.3rem 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      outline: none;
+      min-width: 140px;
+    }
+
+    select:focus,
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+    }
+
+    .filters-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* CARDS DE KPIs */
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 0.9rem 1rem;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .kpi-value-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+
+    .kpi-value {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .kpi-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    .kpi-trend {
+      font-size: 0.7rem;
+      color: var(--accent);
+    }
+
+    .kpi-trend.negative {
+      color: var(--danger);
+    }
+
+    /* GRID PRINCIPAL: gráfico + tabela */
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr);
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+      padding: 1rem 1.1rem;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      background-color: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    /* TABELA */
+
+    .table-container {
+      border-radius: 1rem;
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      background-color: #020617;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    thead {
+      background-color: #020617;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 0.55rem 0.6rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: rgba(15, 23, 42, 0.85);
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: rgba(15, 23, 42, 0.6);
+    }
+
+    tbody td {
+      padding: 0.45rem 0.6rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+      white-space: nowrap;
+    }
+
+    .status-pill-table {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid transparent;
+    }
+
+    .status-concluido {
+      background-color: rgba(34, 197, 94, 0.12);
+      color: var(--accent);
+      border-color: rgba(34, 197, 94, 0.55);
+    }
+
+    .status-andamento {
+      background-color: rgba(59, 130, 246, 0.12);
+      color: var(--info);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .status-pendente {
+      background-color: rgba(249, 115, 22, 0.12);
+      color: var(--warning);
+      border-color: rgba(249, 115, 22, 0.5);
+    }
+
+    .status-outro {
+      background-color: rgba(156, 163, 175, 0.15);
+      color: var(--text-muted);
+      border-color: rgba(75, 85, 99, 0.8);
+    }
+
+    /* RESPONSIVO */
+
+    @media (max-width: 1024px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .main-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.9rem 1rem;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .main {
+        padding: 1rem;
+      }
+
+      .filters-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      .kpi-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-circle">DC</div>
+      <div class="sidebar-title">
+        <span>DMC • Estatística</span>
+        <span>Protocolos periciais consolidados</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-section-title">Módulos</div>
+      <div class="nav-list">
+        <div class="nav-item active">
+          <span>Visão Geral</span>
+        </div>
+        <div class="nav-item">
+          <span>Por Gerência</span>
+        </div>
+        <div class="nav-item">
+          <span>Por Natureza</span>
+        </div>
+        <div class="nav-item">
+          <span>Relatórios Sintéticos</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      Atualizado a partir da aba <strong>Estatística</strong> e <strong>Registro</strong>.
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- HEADER -->
+    <header class="main-header">
+      <div class="main-header-left">
+        <div class="main-header-title">
+          Painel Geral • Estatística DMC
+          <span class="status-pill">Beta • Demo</span>
+        </div>
+        <div class="main-header-subtitle">
+          Visualização consolidada de protocolos, status, gerências e produtividade por período.
+        </div>
+      </div>
+      <div class="main-header-right">
+        <button class="btn" id="btnRefresh">
+          <span class="icon">⟳</span>
+          Recarregar dados
+        </button>
+        <button class="btn btn-primary">
+          <span class="icon">⬇</span>
+          Exportar CSV filtrado
+        </button>
+      </div>
+    </header>
+
+    <!-- FILTERS -->
+    <section class="filters-card">
+      <div class="filters-left">
+        <div class="breadcrumbs">
+          Estatística &rsaquo; <span>Dashboard</span> &rsaquo; <span class="active">Visão Geral</span>
+        </div>
+        <div class="filters-controls">
+          <div class="field">
+            <label for="filterAno">Ano</label>
+            <select id="filterAno">
+              <!-- preenchido via JS -->
+            </select>
+          </div>
+          <div class="field">
+            <label for="filterStatus">Status</label>
+            <select id="filterStatus">
+              <option value="__all__">Todos</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="filterGerencia">Gerência</label>
+            <select id="filterGerencia">
+              <option value="__all__">Todas</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters-right">
+        <div class="field">
+          <label for="searchProto">Buscar por protocolo / perito</label>
+          <input type="text" id="searchProto" placeholder="Digite protocolo ou nome..." />
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Protocolos no filtro</div>
+        <div class="kpi-value-row">
+          <div class="kpi-value" id="kpiTotal">0</div>
+          <div class="kpi-tag">Total filtrado</div>
+        </div>
+        <div class="kpi-trend" id="kpiTotalTrend">–</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Concluídos</div>
+        <div class="kpi-value-row">
+          <div class="kpi-value" id="kpiConcluidos">0</div>
+          <div class="kpi-tag" id="kpiConcluidosPerc">0%</div>
+        </div>
+        <div class="kpi-trend" id="kpiConcluidosTrend">–</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Em andamento / pendentes</div>
+        <div class="kpi-value-row">
+          <div class="kpi-value" id="kpiAndamento">0</div>
+          <div class="kpi-tag" id="kpiAndamentoPerc">0%</div>
+        </div>
+        <div class="kpi-trend negative" id="kpiAndamentoTrend">–</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Gerências ativas</div>
+        <div class="kpi-value-row">
+          <div class="kpi-value" id="kpiGerencias">0</div>
+          <div class="kpi-tag" id="kpiMediaPorGerencia">0 / gerência</div>
+        </div>
+        <div class="kpi-trend" id="kpiGerenciasTrend">–</div>
+      </div>
+    </section>
+
+    <!-- GRID PRINCIPAL -->
+    <section class="main-grid">
+      <!-- GRÁFICO -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Distribuição por Status</div>
+            <div class="card-subtitle">
+              Contagem de protocolos por status, considerando filtros aplicados.
+            </div>
+          </div>
+          <span class="badge" id="chartBadge">Frequência absoluta</span>
+        </div>
+        <canvas id="statusChart" height="200"></canvas>
+      </div>
+
+      <!-- TABELA -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Lista de Protocolos</div>
+            <div class="card-subtitle" id="tableSubtitle">
+              –
+            </div>
+          </div>
+          <span class="badge" id="tableCountBadge">0 registros</span>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Protocolo</th>
+                <th>Ano</th>
+                <th>Data Cad.</th>
+                <th>Status</th>
+                <th>Data Fin.</th>
+                <th>Gerência</th>
+                <th>Perito</th>
+                <th>Município</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ============================================================
+    // 1. DADOS DE EXEMPLO (DEPOIS VAMOS SUBSTITUIR PELA TUA PLANILHA)
+    // ============================================================
+
+    const data = [
+      {
+        protocolo: "2025.15.00001",
+        anoProt: 2025,
+        dataCad: "2025-01-10",
+        anoFin: 2025,
+        dataFin: "2025-01-20",
+        stat: "CONCLUÍDO",
+        dias: 10,
+        acao: "Perícia de celular",
+        motivo: "Quebra de sigilo",
+        perito: "João Silva",
+        gerencia: "GCOMP",
+        macroNatureza: "Crimes contra o patrimônio",
+        coordenadoria: "Criminalística",
+        natureza: "Furto qualificado",
+        municipio: "Cuiabá"
+      },
+      {
+        protocolo: "2025.15.00002",
+        anoProt: 2025,
+        dataCad: "2025-01-15",
+        anoFin: "",
+        dataFin: "",
+        stat: "EM ANDAMENTO",
+        dias: 25,
+        acao: "Exame de vídeo",
+        motivo: "Roubo",
+        perito: "Maria Souza",
+        gerencia: "GPAV",
+        macroNatureza: "Crimes contra o patrimônio",
+        coordenadoria: "Criminalística",
+        natureza: "Roubo majorado",
+        municipio: "Rondonópolis"
+      },
+      {
+        protocolo: "2024.15.12345",
+        anoProt: 2024,
+        dataCad: "2024-11-11",
+        anoFin: 2024,
+        dataFin: "2024-12-01",
+        stat: "CONCLUÍDO",
+        dias: 20,
+        acao: "Balística",
+        motivo: "Homicídio",
+        perito: "Ana Lima",
+        gerencia: "GBAL",
+        macroNatureza: "Crimes contra a vida",
+        coordenadoria: "Criminalística",
+        natureza: "Homicídio doloso",
+        municipio: "Várzea Grande"
+      },
+      {
+        protocolo: "2023.15.54321",
+        anoProt: 2023,
+        dataCad: "2023-05-17",
+        anoFin: "",
+        dataFin: "",
+        stat: "PENDENTE",
+        dias: 180,
+        acao: "Química forense",
+        motivo: "Drogas",
+        perito: "Carlos Nogueira",
+        gerencia: "GQFO",
+        macroNatureza: "Drogas",
+        coordenadoria: "Criminalística",
+        natureza: "Tráfico",
+        municipio: "Sinop"
+      }
+    ];
+
+    // ============================================================
+    // 2. ESTADO DO DASHBOARD E FILTROS
+    // ============================================================
+
+    const filterState = {
+      ano: "__all__",
+      status: "__all__",
+      gerencia: "__all__",
+      search: ""
+    };
+
+    let statusChartInstance = null;
+
+    // ============================================================
+    // 3. FUNÇÕES DE APOIO
+    // ============================================================
+
+    function formatDate(isoStr) {
+      if (!isoStr) return "";
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return isoStr;
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function normalizaStatus(stat) {
+      if (!stat) return "OUTRO";
+      const s = String(stat).trim().toUpperCase();
+      if (s.includes("CONCLU")) return "CONCLUÍDO";
+      if (s.includes("ANDAMENT")) return "EM ANDAMENTO";
+      if (s.includes("PENDEN")) return "PENDENTE";
+      return s;
+    }
+
+    function statusClass(statNorm) {
+      if (statNorm === "CONCLUÍDO") return "status-concluido";
+      if (statNorm === "EM ANDAMENTO") return "status-andamento";
+      if (statNorm === "PENDENTE") return "status-pendente";
+      return "status-outro";
+    }
+
+    function filtrarDados() {
+      return data.filter(item => {
+        if (filterState.ano !== "__all__" && String(item.anoProt) !== String(filterState.ano)) {
+          return false;
+        }
+        const statNorm = normalizaStatus(item.stat);
+        if (filterState.status !== "__all__" && statNorm !== filterState.status) {
+          return false;
+        }
+        if (filterState.gerencia !== "__all__" && item.gerencia !== filterState.gerencia) {
+          return false;
+        }
+        if (filterState.search) {
+          const q = filterState.search.toLowerCase();
+          const alvo = [
+            item.protocolo,
+            item.perito,
+            item.gerencia,
+            item.municipio,
+            item.natureza,
+            item.macroNatureza
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+          if (!alvo.includes(q)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    // ============================================================
+    // 4. POPULAR SELECTS (ANO, STATUS, GERÊNCIA)
+    // ============================================================
+
+    function inicializarFiltros() {
+      const anos = Array.from(new Set(data.map(d => d.anoProt))).sort((a, b) => b - a);
+      const selectAno = document.getElementById("filterAno");
+
+      selectAno.innerHTML = '<option value="__all__">Todos</option>';
+      anos.forEach(ano => {
+        const opt = document.createElement("option");
+        opt.value = ano;
+        opt.textContent = ano;
+        selectAno.appendChild(opt);
+      });
+
+      const selectStatus = document.getElementById("filterStatus");
+      const statusSet = new Set(data.map(d => normalizaStatus(d.stat)));
+      statusSet.delete("OUTRO");
+      statusSet.forEach(st => {
+        const opt = document.createElement("option");
+        opt.value = st;
+        opt.textContent = st;
+        selectStatus.appendChild(opt);
+      });
+
+      const selectGerencia = document.getElementById("filterGerencia");
+      const gerencias = Array.from(new Set(data.map(d => d.gerencia))).sort();
+      gerencias.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g;
+        opt.textContent = g;
+        selectGerencia.appendChild(opt);
+      });
+    }
+
+    // ============================================================
+    // 5. ATUALIZAÇÃO DE KPIs
+    // ============================================================
+
+    function atualizarKpis(filtered) {
+      const total = filtered.length;
+      const totalGlobal = data.length;
+
+      const concluidoCount = filtered.filter(d => normalizaStatus(d.stat) === "CONCLUÍDO").length;
+      const andamentoCount = filtered.filter(d => normalizaStatus(d.stat) === "EM ANDAMENTO").length;
+      const pendenteCount = filtered.filter(d => normalizaStatus(d.stat) === "PENDENTE").length;
+      const gerenciasAtivas = new Set(filtered.map(d => d.gerencia)).size || 0;
+
+      const kpiTotal = document.getElementById("kpiTotal");
+      const kpiTotalTrend = document.getElementById("kpiTotalTrend");
+      const kpiConcluidos = document.getElementById("kpiConcluidos");
+      const kpiConcluidosPerc = document.getElementById("kpiConcluidosPerc");
+      const kpiConcluidosTrend = document.getElementById("kpiConcluidosTrend");
+      const kpiAndamento = document.getElementById("kpiAndamento");
+      const kpiAndamentoPerc = document.getElementById("kpiAndamentoPerc");
+      const kpiAndamentoTrend = document.getElementById("kpiAndamentoTrend");
+      const kpiGerencias = document.getElementById("kpiGerencias");
+      const kpiGerenciasTrend = document.getElementById("kpiGerenciasTrend");
+      const kpiMediaPorGerencia = document.getElementById("kpiMediaPorGerencia");
+
+      kpiTotal.textContent = total;
+      if (totalGlobal > 0) {
+        const perc = ((total / totalGlobal) * 100).toFixed(1);
+        kpiTotalTrend.textContent = `${perc}% do total de registros`;
+      } else {
+        kpiTotalTrend.textContent = "Sem base de comparação";
+      }
+
+      kpiConcluidos.textContent = concluidoCount;
+      const conclPerc = total > 0 ? ((concluidoCount / total) * 100).toFixed(1) : 0;
+      kpiConcluidosPerc.textContent = `${conclPerc}%`;
+
+      kpiConcluidosTrend.textContent =
+        conclPerc >= 70 ? "Excelente desempenho de conclusão" : "Conclusão ainda pode melhorar";
+
+      const emAberto = andamentoCount + pendenteCount;
+      kpiAndamento.textContent = emAberto;
+      const abertosPerc = total > 0 ? ((emAberto / total) * 100).toFixed(1) : 0;
+      kpiAndamentoPerc.textContent = `${abertosPerc}%`;
+
+      kpiAndamentoTrend.textContent =
+        abertosPerc <= 30 ? "Baixo volume de pendências" : "Volume de pendências elevado";
+
+      kpiGerencias.textContent = gerenciasAtivas;
+      const media = gerenciasAtivas > 0 ? (total / gerenciasAtivas).toFixed(1) : 0;
+      kpiMediaPorGerencia.textContent = `${media} / gerência`;
+
+      kpiGerenciasTrend.textContent =
+        gerenciasAtivas > 0 ? "Gerências com protocolos no período filtrado" : "Nenhuma gerência com dados no filtro";
+    }
+
+    // ============================================================
+    // 6. GRÁFICO (Chart.js)
+    // ============================================================
+
+    function atualizarGrafico(filtered) {
+      const ctx = document.getElementById("statusChart").getContext("2d");
+
+      const contagem = {};
+      filtered.forEach(d => {
+        const s = normalizaStatus(d.stat);
+        contagem[s] = (contagem[s] || 0) + 1;
+      });
+
+      const labels = Object.keys(contagem);
+      const values = Object.values(contagem);
+
+      if (statusChartInstance) {
+        statusChartInstance.destroy();
+      }
+
+      statusChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Protocolos",
+              data: values,
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: "#9ca3af",
+                font: {
+                  size: 11
+                }
+              },
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              ticks: {
+                color: "#9ca3af",
+                font: {
+                  size: 11
+                },
+                precision: 0
+              },
+              grid: {
+                color: "rgba(55,65,81,0.6)"
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    // ============================================================
+    // 7. TABELA
+    // ============================================================
+
+    function atualizarTabela(filtered) {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      filtered.forEach(d => {
+        const tr = document.createElement("tr");
+
+        const statNorm = normalizaStatus(d.stat);
+
+        tr.innerHTML = `
+          <td>${d.protocolo || ""}</td>
+          <td>${d.anoProt || ""}</td>
+          <td>${formatDate(d.dataCad)}</td>
+          <td>
+            <span class="status-pill-table ${statusClass(statNorm)}">${statNorm}</span>
+          </td>
+          <td>${formatDate(d.dataFin)}</td>
+          <td>${d.gerencia || ""}</td>
+          <td>${d.perito || ""}</td>
+          <td>${d.municipio || ""}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      const badge = document.getElementById("tableCountBadge");
+      badge.textContent = `${filtered.length} registro${filtered.length !== 1 ? "s" : ""}`;
+
+      const subtitle = document.getElementById("tableSubtitle");
+      subtitle.textContent =
+        filtered.length > 0
+          ? "Registros conforme filtros de ano, status, gerência e busca aplicados."
+          : "Nenhum registro encontrado para os filtros atuais.";
+    }
+
+    // ============================================================
+    // 8. LOOP DE RENDERIZAÇÃO GERAL
+    // ============================================================
+
+    function render() {
+      const filtrados = filtrarDados();
+      atualizarKpis(filtrados);
+      atualizarGrafico(filtrados);
+      atualizarTabela(filtrados);
+    }
+
+    // ============================================================
+    // 9. EVENTOS DE INTERFACE
+    // ============================================================
+
+    function inicializarEventos() {
+      document.getElementById("filterAno").addEventListener("change", e => {
+        filterState.ano = e.target.value;
+        render();
+      });
+
+      document.getElementById("filterStatus").addEventListener("change", e => {
+        filterState.status = e.target.value;
+        render();
+      });
+
+      document.getElementById("filterGerencia").addEventListener("change", e => {
+        filterState.gerencia = e.target.value;
+        render();
+      });
+
+      document.getElementById("searchProto").addEventListener("input", e => {
+        filterState.search = e.target.value.trim();
+        render();
+      });
+
+      document.getElementById("btnRefresh").addEventListener("click", () => {
+        render();
+      });
+    }
+
+    // ============================================================
+    // 10. BOOT
+    // ============================================================
+
+    (function boot() {
+      inicializarFiltros();
+      inicializarEventos();
+      render();
+    })();
+  </script>
+</body>
+</html>
